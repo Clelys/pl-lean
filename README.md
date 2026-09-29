@@ -69,10 +69,9 @@ before closing the page.
 If you need help, show the instructor or teaching assistant the theorem you are
 working on, your current proof, and Lean's complete error message.
 
-## Further resources
+## References
 
 - [Lean 4 Game](https://adam.math.hhu.de/)
 - [Interactive Theorem Proving course](https://github.com/RobertoZunino/ITPCourse/tree/main)
 - [Lean 4 documentation](https://lean-lang.org/documentation/)
 - [Theorem Proving in Lean 4](https://lean-lang.org/theorem_proving_in_lean4/)
-- 
