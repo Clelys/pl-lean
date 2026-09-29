@@ -1,8 +1,8 @@
 # Programming Languages lab in Lean
 
-This laboratory is an introduction to functional programming and theorem
-proving with Lean 4. No previous experience with functional programming or
-formal proofs is required.
+This laboratory is an introduction to functional programming and theorem proving with Lean 4. 
+
+No previous experience with functional programming or formal proofs is required.
 
 ## Getting started
 
@@ -22,7 +22,7 @@ example (b : Bool) : b && true = b := by
   sorry
 ```
 
-Replace `sorry` with your proof:
+Replace `sorry` with your code:
 
 ```lean
 example (b : Bool) : b && true = b := by
@@ -33,45 +33,39 @@ example (b : Bool) : b && true = b := by
 
 Lean checks your code continuously:
 
-- Place the cursor inside a proof to see the current goal and hypotheses in the
-  **Infoview**.
-- A red underline indicates an error. Hover over it and read the complete error
-  message.
-- A warning about `sorry` means that the exercise is not finished, although
-  Lean temporarily accepts the file.
+- Place the cursor inside a proof to see the current goal and hypotheses in the **Infoview**.
+- A red underline indicates an error. Hover over it and read the complete error message.
+- A warning about `sorry` means that the exercise is not finished, although Lean temporarily accepts the file.
 
-Work on one exercise at a time. Do not change the theorem statement unless the
-exercise explicitly asks you to do so.
+Work on one exercise at a time. Do not change names or types unless the exercise explicitly asks you to do so.
 
 ## Useful commands
 
 ```lean
 #check Bool             -- Ask Lean for the type of an expression.
 #eval true && false     -- Evaluate an expression.
-#print name             -- Prints the definition of a name
+#print name             -- Print the definition of a name.
 ```
-Some proof commands used in the first laboratories are:
 
-- `rfl`: prove an equality by computation;
+Some proof commands used in the first laboratories are:
+- `rfl`: prove an equality by computation and reflexivity;
 - `intro h`: introduce an assumption or a universally quantified value;
-- `exact h`: finish the goal using `h`;
 - `cases b`: consider all possible forms of `b`;
-- `simp`: simplify the goal using known rules.
+- `simp`: simplify the goal using known rules;
+- `exact h`: finish the goal using `h`.
 
 You are not expected to memorize every command. Try small examples and use the
 Infoview to observe how each command changes the goal.
 
 ## Saving your work
 
-Save your work frequently. If you use Lean 4 Web, copy or download your code
-before closing the page.
+Save your work frequently. If you use Lean 4 Web, copy or download your code before closing the page.
 
-If you need help, show the instructor or teaching assistant the theorem you are
-working on, your current proof, and Lean's complete error message.
+If you need help, show the instructor or teaching assistant the code you are working on, your current attempt, and Lean's complete error message.
 
 ## References
 
-- [Lean 4 Game](https://adam.math.hhu.de/)
+- [Lean Game Server](https://adam.math.hhu.de/)
 - [Interactive Theorem Proving course](https://github.com/RobertoZunino/ITPCourse/tree/main)
-- [Lean 4 documentation](https://lean-lang.org/documentation/)
+- [Lean 4 documentation](https://lean-lang.org/learn/)
 - [Theorem Proving in Lean 4](https://lean-lang.org/theorem_proving_in_lean4/)
