@@ -1,6 +1,6 @@
 /-
 
-# Lean 4: first steps in functional programming
+# Introduction to functional programming and theorem proving in Lean
 
 This file is both a lecture and a Lean program.  Read the comments from top to
 bottom, but also place the cursor on each command and inspect Lean's Infoview.
@@ -32,8 +32,9 @@ section Reading_this_file
 
 ## How to read this file
 
-Text between `/-` and `-/` is a block comment.  Text following `--` is a
-single-line comment.  Lean ignores comments when checking the program.
+Text between `/-` and `-/` is a block comment.
+Text following `--` is a single-line comment.
+Lean ignores comments when checking the program.
 
 Lean code often contains Unicode symbols.  In the Lean editor, type a
 backslash followed by an abbreviation and then a space.  For example:
@@ -85,9 +86,9 @@ program being defined.
 
 -/
 
-#check Bool
-#check true
+#check true         --- values have types
 #check false
+#check Bool         --- also types have types!
 
 #eval true
 #eval false
