@@ -275,7 +275,7 @@ def mystery : Bool → Bool :=
 /-
   __Exercise__: find a simpler way to define a function equivalent to the `mystery` above.
   The function must satisfy the equality specified by the theorem `mystery_resolved`.
-  For the moment, leave the `sorry`.
+  For the moment, leave the `sorry` in `mystery_resolved`.
 -/
 
 def mystery₂ : Bool → Bool := sorry
@@ -844,6 +844,11 @@ State and prove the associativity of conjunction: a && (b && c) = (a && b) && c
 
 --- theorem and_associative (a b : Bool) : ... := sorry
 
+/-
+Hint: mind the priority of the operators && and =.
+You can put your mouse over them in the Infoview to see what operands Lean
+automatically groups together in the absence of parentheses.
+-/
 
 /-
 
