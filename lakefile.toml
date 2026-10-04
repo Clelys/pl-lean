@@ -1,0 +1,16 @@
+name = "pl-lean"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["pl-lean"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+autoImplicit = false
+warn.sorry = false    # Don't warn for sorry
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+
+[[lean_lib]]
+name = "pl-lean"
