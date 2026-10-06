@@ -144,6 +144,14 @@ Prove that `eqN` is reflexive. Hint: proceed by induction on `a`, and use the `e
 theorem eqN_refl (a : Nat) : eqN a a = true := by
   sorry
 
+/-
+### Exercise: Antisymmetricity of leN
+
+Prove that `leN` is antisymmetric.
+-/
+
+theorem leN_antisymm : ∀ n m, leN n m → leN m n → eqN n m := by
+  sorry
 
 /-
 ### Exercise: Alternative characterization of even (n + 1)
@@ -177,6 +185,15 @@ theorem doubleN_addN (n: Nat) : doubleN n = addN n n := by
 
 
 /-
+### Exercise: Double and multiplication
+
+Hint: you don't need explicit induction here.
+-/
+
+theorem doubleN_mulN (n: Nat) : doubleN n = mulN 2 n := by
+  sorry
+
+/-
 ### Exercise: Associativity of addN
 
 Prove that `addN` is associative.
@@ -187,5 +204,14 @@ Hint: induction on `k`.  In the successor case, unfold the additions with
 
 theorem addN_assoc (n m k : Nat) : addN (addN n m) k = addN n (addN m k) := by
   sorry
+
+/-
+### Exercise: A+A=B+B so A=B
+
+Prove the opposite direction of `addN_id`.
+-/
+
+theorem addN_id' (n m : Nat) : addN n n = addN m m → n = m := by sorry
+
 
 end Exercises

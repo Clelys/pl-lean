@@ -1273,6 +1273,12 @@ theorem not_eqN_of_false (a b : Nat) (h : eqN a b = false) :
     !(eqN a b) = true := by
   sorry
 
+/-
+### Exercise: One ain't double
 
+Hint: you can discharge a contradiction `h` with `cases h`.
+-/
+
+theorem one_not_double : ∀ n, 1 = mulN 2 n → False := by sorry
 
 end Exercises
