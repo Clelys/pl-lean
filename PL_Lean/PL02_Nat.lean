@@ -1274,6 +1274,22 @@ theorem not_eqN_of_false (a b : Nat) (h : eqN a b = false) :
   sorry
 
 /-
+### Exercise: Summing up equal numbers
+
+Solve this by way of rewriting the right theorems or assumptions.
+-/
+
+theorem plus_id : ∀ n m o : Nat, n = m → m = o → n + m = m + o := by sorry
+
+/-
+### Exercise: Multiplying by zero
+
+Solve this by way of rewriting the right theorems or assumptions.
+-/
+
+theorem mult_n_0_m_0 : ∀ n m : Nat, addN (mulN n 0) (mulN m 0) = 0 := by sorry
+
+/-
 ### Exercise: One ain't double
 
 Hint: you can discharge a contradiction `h` with `cases h`.
