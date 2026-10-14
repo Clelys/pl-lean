@@ -132,7 +132,12 @@ the induction hypothesis `ih`.  You can use them with `rw [...]` or inside `simp
 -/
 
 theorem zero_mulN (n : Nat) : mulN 0 n = 0 := by
-  sorry
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+      rw [mulN_succ]
+      rw [ih]
+      rw [addN_zero]
 
 
 /-
@@ -142,7 +147,9 @@ Prove that `eqN` is reflexive. Hint: proceed by induction on `a`, and use the `e
 -/
 
 theorem eqN_refl (a : Nat) : eqN a a = true := by
-  sorry
+  induction a with
+  | zero => rfl
+  | succ a' ih => exact ih
 
 /-
 ### Exercise: Antisymmetricity of leN
@@ -161,7 +168,9 @@ Hint: `simp` knows that ! is involutory
 -/
 
 theorem isEven_succ (n: Nat) : isEven (n+1) = !(isEven n) := by
-  sorry
+  induction n with
+  | zero => rfl
+  | succ n' ih => simp[ih, isEven]
 
 
 /-
@@ -171,8 +180,12 @@ Hint: by induction on `n`.
 -/
 
 theorem isEven_doubleN (n: Nat) : isEven (doubleN n) = true := by
-  sorry
-
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+     rw [doubleN]
+     rw [isEven]
+     exact ih
 
 /-
 ### Exercise: Double and addition
@@ -181,7 +194,12 @@ Hint: by induction on `n`.
 -/
 
 theorem doubleN_addN (n: Nat) : doubleN n = addN n n := by
-  sorry
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+    rw [addN_self_succ]
+    rw [<-ih]
+    rfl
 
 
 /-
@@ -193,6 +211,10 @@ Hint: you don't need explicit induction here.
 theorem doubleN_mulN (n: Nat) : doubleN n = mulN 2 n := by
   sorry
 
+
+
+
+
 /-
 ### Exercise: Associativity of addN
 
@@ -203,7 +225,10 @@ Hint: induction on `k`.  In the successor case, unfold the additions with
 -/
 
 theorem addN_assoc (n m k : Nat) : addN (addN n m) k = addN n (addN m k) := by
-  sorry
+  induction k with
+  | zero => rfl
+  | succ k' ih => simp[addN_succ_right, ih]
+
 
 /-
 ### Exercise: A+A=B+B so A=B
@@ -211,7 +236,8 @@ theorem addN_assoc (n m k : Nat) : addN (addN n m) k = addN n (addN m k) := by
 Prove the opposite direction of `addN_id`.
 -/
 
-theorem addN_id' (n m : Nat) : addN n n = addN m m → n = m := by sorry
+theorem addN_id' (n m : Nat) : addN n n = addN m m → n = m := by
+ sorry
 
 
 end Exercises
