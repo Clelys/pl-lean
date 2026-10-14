@@ -1211,7 +1211,9 @@ application of `rw`.
 
 theorem addN_two_steps (n m : Nat) :
     addN n (m + 1 + 1) = addN n m + 1 + 1 := by
-  sorry
+    rw [addN_succ_right]
+    rfl
+
 
 
 /-
@@ -1223,7 +1225,9 @@ Rewrite both occurrences of `addN` in `h`, using `addN_zero n` and
 
 theorem addN_zero_cancel (n m : Nat)
     (h : addN n 0 = addN m 0) : n = m := by
-  sorry
+    rw[addN_zero n] at h
+    rw[addN_zero m] at h
+    exact h
 
 
 /-
@@ -1234,7 +1238,8 @@ Use `hab` from right to left in the goal, and then use `exact`.
 
 theorem eq_from_common_left (a b c : Nat)
     (hab : a = b) (hac : a = c) : b = c := by
-  sorry
+  rw[<-hab]
+  exact hac
 
 
 /-
@@ -1245,9 +1250,9 @@ resulting goals can be closed by computation.
 -/
 
 theorem leN_eq_eqN_zero (n : Nat) : leN n 0 = eqN n 0 := by
-  sorry
-
-
+  cases n with
+  | zero => rfl
+  | succ n' => rfl
 /-
 ### Exercise: Case analysis on an impossible equality
 
@@ -1255,7 +1260,8 @@ Introduce the equality as a hypothesis and then perform case analysis on it.
 -/
 
 theorem zero_ne_succ (n : Nat) : 0 = Nat.succ n → False := by
-  sorry
+ intros h
+ cases h
 
 
 /-
@@ -1267,7 +1273,10 @@ hypotheses `hab` and `hbc`.
 
 theorem eq_trans_apply (a b c : Nat)
     (hab : a = b) (hbc : b = c) : a = c := by
-  sorry
+    apply eq_trans₂ a b c
+    exact hab
+    exact hbc
+
 
 
 /-
@@ -1280,7 +1289,12 @@ theorem succ_succ_succ_injective (a b : Nat) :
     Nat.succ (Nat.succ (Nat.succ a)) =
       Nat.succ (Nat.succ (Nat.succ b)) →
     a = b := by
-  sorry
+    intros h
+    apply succN_injective
+    apply succN_injective
+    apply succN_injective
+    exact h
+
 
 
 /-
