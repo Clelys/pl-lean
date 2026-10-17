@@ -473,6 +473,57 @@ def leN : Nat → Nat → Bool
 -/
 
 theorem leN_refl (n : Nat) : leN n n = true := by
+  induction n with
+  | zero => rfl
+  | succ n' ih => rw [leN, ih]
+
+
+/-
+### Exercise: Interplay of leN and successor: right increment
+
+**Difficulty: 3/4 (substantial).**
+
+Prove that the less than or equal relation between two natural numbers is preserved by incrementing the right term.
+
+Hint: induction on `a` generalizing `b`. In the inductive case, case-analysis on `b`.
+
+An explanation about the concept of _generalizing_ a variable is due.
+
+A side-effect of declaring the arguments of `a` and `b` on the left side of the
+colon `:` is that they're already introduced in the proof context,
+forcing us to work with fixed values for the rest of the proof.
+
+You can try proceeding naively by inducting on `a` right away, byt you will
+eventually get stuck with an inductive hypothesis that is too weak to
+prove your goal: the `b` it talks about still refers to the same constant
+value introduced at the beginning of the proof, and doing case analysis on `b`
+specializes the inductive hypothesis even more.
+
+Instead, we need an inductive hypothesis that works for any natural number `b`.
+We can ask Lean to produce such a stronger inductive hypothesis that is
+universally quantified on `b` by writing `induction a generalizing b`, before
+the `with` keyword.
+
+This lets you apply the hypothesis stating `leN a' (b' + 1) = true` to
+the inductive hypotesis, which will give you the goal.
+-/
+theorem leN_succ_right (a b : Nat) : leN a b = true → leN a (b + 1) = true := by
+  sorry
+
+
+/-
+### Exercise: Interplay of leN and successor: left increment
+
+**Difficulty: 3/4 (substantial).**
+
+Prove that the less than or equal relation between two natural numbers is also
+preserved by incrementing the left term, or, equivalently, if `a` is strictly
+less than `b` then it is also less than or equal to `b`.
+
+Hint: induction on `b` generalizing `a`. In the inductive case,
+do case-analysis on `a`.
+-/
+theorem leN_succ_left (a b : Nat) : leN (a + 1) b = true → leN a b = true := by
   sorry
 
 
@@ -487,6 +538,9 @@ Hint: do `intro n` first, then induct on `n`, so that `m` stays quantified in
 the induction hypothesis.  Then split `m` with `cases`: the mixed cases
 (`zero` with `succ`, `succ` with `zero`) have a false hypothesis.
 In the `succ`, `succ` case, use the induction hypothesis.
+
+Note that you don't need to generalize `m` if you intro and induct on `n`
+as suggested because the proposition has `m` universally quantified.
 -/
 
 theorem leN_antisymm : ∀ n m, leN n m → leN m n → eqN n m := by
@@ -799,8 +853,9 @@ Hint: no induction is needed.  There are three constructors, so use `cases`.
 
 theorem binToNat_binDouble (b : BinNat) :
     binToNat (binDouble b) = 2 * binToNat b := by
-  sorry
-
+  cases b with
+  | bz => rfl
+  | _ b => simp [binDouble, binToNat]
 
 /-
 ### Task 7: Correctness of binary increment (2)
@@ -846,5 +901,95 @@ Hint: induction on `n`.  The successor case needs `natToBin_succ`,
 theorem binToNat_natToBin (n : Nat) : binToNat (natToBin n) = n := by
   sorry
 
+
+/-
+### Task 9: Normalizing a binary number
+
+**Difficulty: 4/4 (challenge).**
+
+The previous theorem proves that `binToNat` is a left inverse for `natToBin`. (implying `natToBin` is injective).
+
+However, since `binToNat` is not injective (for example, it sends both `.b1 .bz` and `.b1 .b0 .bz` to the natural 1), or since `natToBin` is not surjective, `binToNat` is not a right inverse for `natToBin`, meaning the composition `natToBin ∘ binToNat` is not the identity.
+-/
+
+def normalize : BinNat → BinNat := natToBin ∘ binToNat
+
+/-
+It serves nonetheless as a "normalizing" function that given a binary
+number produces its canonical
+representation, where the number has been stripped of any leading zeros.
+
+Note: in the following examples we write binary values using Lean's dot notation
+for constructors, which allows to build larger values of an inductive type by appending its unary constructors
+on the right of an existing value with a dot. In the case of our binary numbers allows us to can write them in the natural notation where the most significant digits appear on the left.
+-/
+
+def bz := BinNat.bz           -- shorthand to avoid repeating BinNat.bz
+def nine := bz.b0.b1.b0.b0.b1
+
+#eval normalize BinNat.bz.b0
+#eval normalize BinNat.bz.b0.b0.b0.b1
+#eval normalize nine
+#eval binToNat (normalize BinNat.bz.b0.b0.b0.b1)
+
+/-
+We can define a function that tests if a binary number has one or more
+leading zeros: it suffices to check for the pattern `.b0 .bz`.
+-/
+
+def hasLeadingZeros : BinNat → Bool
+| .bz => false
+| .b0 .bz => true
+| .b0 b => hasLeadingZeros b
+| .b1 b => hasLeadingZeros b
+
+#eval hasLeadingZeros bz.b0                             -- 00, true
+#eval hasLeadingZeros nine                              -- true
+#eval hasLeadingZeros bz.b0.b0.b1.b0.b0.b1.b0.b0.b1     -- true
+#eval hasLeadingZeros bz.b1.b0.b0.b1.b0.b0.b1.b0.b0.b1  -- false
+
+/-
+The goal of this exercise is to prove that `normalize` actually computes the smallest possible representation of the binary number.
+
+First, we provide a few auxiliary theorems that'll help us arrive at the main result and make you prove a some other.
+-/
+
+/-
+1.
+-/
+theorem binIncr_binDouble (b : BinNat) : binDouble (binIncr b) = binIncr (binIncr (binDouble b)) := by
+  sorry
+
+
+/-
+1. A useful equality between `binDouble` and `binToNat`: we get the same number by  either doubling the binary result or doubling the natural argument of `natToBin` with the respective operations.
+-/
+theorem binDouble_binToNat (n : Nat) :
+    binDouble (natToBin n) = natToBin (2 * n) := by
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+    rw [← mulN_mul, mulN_succ_right, addN, addN, addN_zero, mulN_mul]
+    rw [natToBin, natToBin, natToBin]
+    rw [← ih, binIncr_binDouble]
+
+
+/-
+2. Prove that your implementation of `binDouble` preserves the result of `hasLeadingZeros` on its argument. This will help you prove one of the inductive cases of the boss theorem.
+-/
+
+theorem binDouble_leadingZeros (b : BinNat) : hasLeadingZeros (binDouble b) = hasLeadingZeros b := by
+  sorry
+
+
+/-
+The boss theorem.
+Prove that `normalize` computes the smallest possible resprentation:
+the binary it returns does not have any leading zero.
+-/
+
+theorem normalize_smallest (b : BinNat) : hasLeadingZeros (normalize b) = false := by
+  have normalize_eq (b : BinNat) : natToBin (binToNat b) = normalize b := by rfl
+  sorry
 
 end Binary_numbers
