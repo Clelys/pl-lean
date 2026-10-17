@@ -909,19 +909,25 @@ theorem binToNat_natToBin (n : Nat) : binToNat (natToBin n) = n := by
 
 The previous theorem proves that `binToNat` is a left inverse for `natToBin`. (implying `natToBin` is injective).
 
-However, since `binToNat` is not injective (for example, it sends both `.b1 .bz` and `.b1 .b0 .bz` to the natural 1), or since `natToBin` is not surjective, `binToNat` is not a right inverse for `natToBin`, meaning the composition `natToBin ∘ binToNat` is not the identity.
+However, since `binToNat` is not injective (for example, it sends both
+`.b1 .bz` and `.b1 .b0 .bz` to the natural 1), or equivalently since `natToBin`
+is not surjective, `binToNat` is not a right inverse for `natToBin`,
+meaning the composition `natToBin ∘ binToNat` is not the identity.
 -/
 
 def normalize : BinNat → BinNat := natToBin ∘ binToNat
 
 /-
-It serves nonetheless as a "normalizing" function that given a binary
-number produces its canonical
-representation, where the number has been stripped of any leading zeros.
+It servers nonetheless as a "normalizing" function that given a binary
+number produces its canonical representation, where the number
+has been stripped of any leading zeros.
 
 Note: in the following examples we write binary values using Lean's dot notation
-for constructors, which allows to build larger values of an inductive type by appending its unary constructors
-on the right of an existing value with a dot. In the case of our binary numbers allows us to can write them in the natural notation where the most significant digits appear on the left.
+for constructors, which allows to build larger values of an inductive type by
+appending its unary constructors on the right of an existing value with a dot.
+
+In the case of our binary numbers allows us to can write them in the natural
+notation where the most significant digits appear on the left.
 -/
 
 def bz := BinNat.bz           -- shorthand to avoid repeating BinNat.bz
@@ -949,47 +955,67 @@ def hasLeadingZeros : BinNat → Bool
 #eval hasLeadingZeros bz.b1.b0.b0.b1.b0.b0.b1.b0.b0.b1  -- false
 
 /-
-The goal of this exercise is to prove that `normalize` actually computes the smallest possible representation of the binary number.
+The goal of this exercise is to prove that normalize actually computes
+the smallest possible representation of the binary number.
 
-First, we provide a few auxiliary theorems that'll help us arrive at the main result and make you prove a some other.
+First, we prove a few auxiliary theorems that'll help us arrive at the
+main result.
 -/
 
 /-
-1.
+1. An algebraic equality between `binDouble` and `binIncr` needed for the
+next theorem.
 -/
 theorem binIncr_binDouble (b : BinNat) : binDouble (binIncr b) = binIncr (binIncr (binDouble b)) := by
-  sorry
+  cases b <;> simp [binDouble, binIncr]
 
 
 /-
-1. A useful equality between `binDouble` and `binToNat`: we get the same number by  either doubling the binary result or doubling the natural argument of `natToBin` with the respective operations.
+2. A useful equality between `binDouble` and `binToNat`: we get the same number
+by  either doubling the binary result or doubling the natural argument of
+`natToBin` with the respective operations.
+
+Hint: simplify the inductive case with `Nat.mul_succ` and `natToBin`,
+then rewrite the IH and `binIncr_binDouble`.
 -/
 theorem binDouble_binToNat (n : Nat) :
     binDouble (natToBin n) = natToBin (2 * n) := by
   induction n with
   | zero => rfl
   | succ n' ih =>
-    rw [← mulN_mul, mulN_succ_right, addN, addN, addN_zero, mulN_mul]
-    rw [natToBin, natToBin, natToBin]
+    simp [Nat.mul_succ, natToBin]
     rw [← ih, binIncr_binDouble]
 
 
 /-
-2. Prove that your implementation of `binDouble` preserves the result of `hasLeadingZeros` on its argument. This will help you prove one of the inductive cases of the boss theorem.
+3. Prove that your implementation of `binDouble` preserves the result of
+`hasLeadingZeros` on its argument.
+
+This will help you prove one of the inductive cases of the boss theorem.
 -/
 
-theorem binDouble_leadingZeros (b : BinNat) : hasLeadingZeros (binDouble b) = hasLeadingZeros b := by
+theorem binDouble_hasLeadingZeros (b : BinNat) : hasLeadingZeros (binDouble b) = hasLeadingZeros b := by
   sorry
 
 
 /-
 The boss theorem.
+
 Prove that `normalize` computes the smallest possible resprentation:
 the binary it returns does not have any leading zero.
+
+Hints:
+1. induction on `b`. In both inductive cases, rewrite `binDouble_binToNat`
+to eliminate the `2 * n` multiplication.
+2. in the `b0 b'` case, rewrite `binDouble_hasLeadingZeros`.
+3. in the `b1 b'` case, do case analysis on `normalize b'` recording the
+    equality for the constructor instance with the syntax
+    `cases eq : normalize b' with`.
 -/
 
 theorem normalize_smallest (b : BinNat) : hasLeadingZeros (normalize b) = false := by
-  have normalize_eq (b : BinNat) : natToBin (binToNat b) = normalize b := by rfl
+  have normalize_eq (b : BinNat) : normalize b = natToBin (binToNat b) := by rfl
   sorry
+
 
 end Binary_numbers
