@@ -473,9 +473,7 @@ def leN : Nat → Nat → Bool
 -/
 
 theorem leN_refl (n : Nat) : leN n n = true := by
-  induction n with
-  | zero => rfl
-  | succ n' ih => rw [leN, ih]
+  sorry
 
 
 /-
@@ -483,9 +481,11 @@ theorem leN_refl (n : Nat) : leN n n = true := by
 
 **Difficulty: 3/4 (substantial).**
 
-Prove that the less than or equal relation between two natural numbers is preserved by incrementing the right term.
+Prove that the less than or equal relation between two natural numbers is
+preserved by incrementing the right term.
 
-Hint: induction on `a` generalizing `b`. In the inductive case, case-analysis on `b`.
+Hint: induction on `a` generalizing `b`. In the inductive case,
+case-analysis on `b`.
 
 An explanation about the concept of _generalizing_ a variable is due.
 
@@ -853,9 +853,7 @@ Hint: no induction is needed.  There are three constructors, so use `cases`.
 
 theorem binToNat_binDouble (b : BinNat) :
     binToNat (binDouble b) = 2 * binToNat b := by
-  cases b with
-  | bz => rfl
-  | _ b => simp [binDouble, binToNat]
+  sorry
 
 /-
 ### Task 7: Correctness of binary increment (2)
@@ -905,9 +903,9 @@ theorem binToNat_natToBin (n : Nat) : binToNat (natToBin n) = n := by
 /-
 ### Task 9: Normalizing a binary number
 
-**Difficulty: 4/4 (challenge).**
+**Difficulty: 4/4 overall.**
 
-The previous theorem proves that `binToNat` is a left inverse for `natToBin`. (implying `natToBin` is injective).
+The previous theorem proves that `binToNat` is a left inverse for `natToBin`.
 
 However, since `binToNat` is not injective (for example, it sends both
 `.b1 .bz` and `.b1 .b0 .bz` to the natural 1), or equivalently since `natToBin`
@@ -915,10 +913,10 @@ is not surjective, `binToNat` is not a right inverse for `natToBin`,
 meaning the composition `natToBin ∘ binToNat` is not the identity.
 -/
 
-def normalize : BinNat → BinNat := natToBin ∘ binToNat
+def normalize (b : BinNat) : BinNat := natToBin (binToNat b)
 
 /-
-It servers nonetheless as a "normalizing" function that given a binary
+It serves nonetheless as a "normalizing" function that given a binary
 number produces its canonical representation, where the number
 has been stripped of any leading zeros.
 
@@ -931,12 +929,13 @@ notation where the most significant digits appear on the left.
 -/
 
 def bz := BinNat.bz           -- shorthand to avoid repeating BinNat.bz
-def nine := bz.b0.b1.b0.b0.b1
+def nine := bz.b1.b0.b0.b1
 
-#eval normalize BinNat.bz.b0
-#eval normalize BinNat.bz.b0.b0.b0.b1
-#eval normalize nine
-#eval binToNat (normalize BinNat.bz.b0.b0.b0.b1)
+example : normalize bz.b0 = bz := by rfl
+example : normalize bz.b0.b0.b0.b1 = bz.b1 := by rfl
+example : normalize nine = nine := by rfl
+example : binToNat (normalize bz.b0.b0.b0.b1) = 1 := by rfl
+example : binToNat (normalize nine) = 9 := by rfl
 
 /-
 We can define a function that tests if a binary number has one or more
@@ -949,13 +948,13 @@ def hasLeadingZeros : BinNat → Bool
 | .b0 b => hasLeadingZeros b
 | .b1 b => hasLeadingZeros b
 
-#eval hasLeadingZeros bz.b0                             -- 00, true
-#eval hasLeadingZeros nine                              -- true
-#eval hasLeadingZeros bz.b0.b0.b1.b0.b0.b1.b0.b0.b1     -- true
-#eval hasLeadingZeros bz.b1.b0.b0.b1.b0.b0.b1.b0.b0.b1  -- false
+example : hasLeadingZeros bz.b0 = true := by rfl
+example : hasLeadingZeros nine = false := by rfl
+example : hasLeadingZeros bz.b0.b0.b1.b0.b0.b1.b0.b0.b1 = true := by rfl
+example : hasLeadingZeros bz.b1.b0.b0.b1.b0.b0.b1.b0.b0.b1 = false := by rfl
 
 /-
-The goal of this exercise is to prove that normalize actually computes
+The goal of this exercise is to prove that `normalize` actually computes
 the smallest possible representation of the binary number.
 
 First, we prove a few auxiliary theorems that'll help us arrive at the
@@ -963,58 +962,67 @@ main result.
 -/
 
 /-
-1. An algebraic equality between `binDouble` and `binIncr` needed for the
+#### Sub-task 1 - Difficulty: 2/4 (simplification).
+
+An algebraic equality between `binDouble` and `binIncr` needed for the
 next theorem.
+
+Hint: induction not necessary, simplify by the definitions `binDouble` and `binIncr`.
 -/
-theorem binIncr_binDouble (b : BinNat) : binDouble (binIncr b) = binIncr (binIncr (binDouble b)) := by
-  cases b <;> simp [binDouble, binIncr]
+theorem binIncr_binDouble (b : BinNat) :
+    binDouble (binIncr b) = binIncr (binIncr (binDouble b)) := by
+  sorry
 
 
 /-
-2. A useful equality between `binDouble` and `binToNat`: we get the same number
+#### Sub-task 2 - Difficulty: 3/4 (standard induction and linear algebra).
+
+A useful equality between `binDouble` and `binToNat`: we get the same number
 by  either doubling the binary result or doubling the natural argument of
 `natToBin` with the respective operations.
 
-Hint: simplify the inductive case with `Nat.mul_succ` and `natToBin`,
-then rewrite the IH and `binIncr_binDouble`.
+Hint: induct on `n`; in the inductive case simplify with `Nat.mul_succ`
+and `natToBin`, then rewrite with the IH and `binIncr_binDouble`.
 -/
 theorem binDouble_binToNat (n : Nat) :
     binDouble (natToBin n) = natToBin (2 * n) := by
-  induction n with
-  | zero => rfl
-  | succ n' ih =>
-    simp [Nat.mul_succ, natToBin]
-    rw [← ih, binIncr_binDouble]
+  sorry
 
 
 /-
-3. Prove that your implementation of `binDouble` preserves the result of
+#### Sub-task 3 - Difficulty: 2/4 (standard induction).
+
+Prove that your implementation of `binDouble` preserves the result of
 `hasLeadingZeros` on its argument.
 
 This will help you prove one of the inductive cases of the boss theorem.
 -/
 
-theorem binDouble_hasLeadingZeros (b : BinNat) : hasLeadingZeros (binDouble b) = hasLeadingZeros b := by
+theorem binDouble_hasLeadingZeros (b : BinNat) :
+    hasLeadingZeros (binDouble b) = hasLeadingZeros b := by
   sorry
 
 
 /-
-The boss theorem.
+#### Sub-task 4 - Difficulty: 4/4 (boss challenge).
 
 Prove that `normalize` computes the smallest possible resprentation:
 the binary it returns does not have any leading zero.
 
 Hints:
-1. induction on `b`. In both inductive cases, rewrite `binDouble_binToNat`
-to eliminate the `2 * n` multiplication.
-2. in the `b0 b'` case, rewrite `binDouble_hasLeadingZeros`.
-3. in the `b1 b'` case, do case analysis on `normalize b'` recording the
-    equality for the constructor instance with the syntax
-    `cases eq : normalize b' with`.
+
+1. Induction on `b`. In both inductive cases, rewrite `binDouble_binToNat`
+   to eliminate the `2 * n` multiplication.
+
+2. In the `b0 b'` case, rewrite `binDouble_hasLeadingZeros`.
+
+3. In the `b1 b'` case, do case analysis on `normalize b'` recording the
+   equality for the constructor instance with the syntax
+   `cases eq : normalize b' with`.
 -/
 
-theorem normalize_smallest (b : BinNat) : hasLeadingZeros (normalize b) = false := by
-  have normalize_eq (b : BinNat) : normalize b = natToBin (binToNat b) := by rfl
+theorem normalize_smallest (b : BinNat) :
+    hasLeadingZeros (normalize b) = false := by
   sorry
 
 
