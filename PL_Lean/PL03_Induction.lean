@@ -758,6 +758,23 @@ inductive BinNat where
   deriving Repr
 
 /-
+In the rest of the exercise we write binary values using Lean's dot notation
+for constructors, which allows to build larger values of an inductive type by
+appending its unary constructors on the right of an existing value with a dot,
+avoiding the need for parentheses for nested values.
+
+In the case of our binary numbers, it also means we can write them in the more
+natural notation where the most significant digits appear on the left.
+-/
+
+def bz := BinNat.bz           -- shorthand to avoid repeating BinNat.bz
+
+def nine := bz.b1.b0.b0.b1
+def nineteen := nine.b1
+def thirtysix := nine.b0.b0
+
+
+/-
 ### Task 1: Converting binary to natural
 
 **Difficulty: 1/4 (warm-up programming).**
@@ -767,7 +784,7 @@ Write a function `binToNat` that converts a `BinNat` into a `Nat`.
 
 def binToNat : BinNat → Nat := sorry
 
-example : binToNat (.b0 (.b1 (.b1 .bz))) = 6 := by sorry
+example : binToNat bz.b1.b1.b0 = 6 := by sorry
 
 
 /-
@@ -783,7 +800,7 @@ Write a function `binIncr` that adds one *directly on numerals*, as in a binary 
 
 def binIncr : BinNat → BinNat := sorry
 
-example : binToNat (binIncr (.b0 (.b1 (.b1 .bz)))) = 7 := by sorry
+example : binToNat (binIncr bz.b1.b1.b0) = 7 := by sorry
 
 /-
 ### Task 3: Converting natural to binary
@@ -796,8 +813,8 @@ by counting up from zero.
 
 def natToBin : Nat → BinNat := sorry
 
-example : natToBin 6 = (.b0 (.b1 (.b1 .bz))) := by sorry
-example : natToBin 11 = (.b1 (.b1 (.b0 (.b1 .bz)))) := by sorry
+example : natToBin 6 = bz.b1.b1.b0 := by sorry
+example : natToBin 11 = bz.b1.b0.b1.b1 := by sorry
 
 
 /-
@@ -920,22 +937,16 @@ It serves nonetheless as a "normalizing" function that given a binary
 number produces its canonical representation, where the number
 has been stripped of any leading zeros.
 
-Note: in the following examples we write binary values using Lean's dot notation
-for constructors, which allows to build larger values of an inductive type by
-appending its unary constructors on the right of an existing value with a dot.
-
-In the case of our binary numbers allows us to can write them in the natural
-notation where the most significant digits appear on the left.
+Replace the `sorry`'s below with `rfl` to check that your `normalize`
+behaves correctly.
 -/
 
-def bz := BinNat.bz           -- shorthand to avoid repeating BinNat.bz
-def nine := bz.b1.b0.b0.b1
+example : normalize bz.b0 = bz := by sorry
+example : normalize bz.b0.b0.b0.b1 = bz.b1 := by sorry
+example : normalize nine = nine := by sorry
 
-example : normalize bz.b0 = bz := by rfl
-example : normalize bz.b0.b0.b0.b1 = bz.b1 := by rfl
-example : normalize nine = nine := by rfl
-example : binToNat (normalize bz.b0.b0.b0.b1) = 1 := by rfl
-example : binToNat (normalize nine) = 9 := by rfl
+example : binToNat (normalize bz.b0.b0.b0.b1) = 1 := by sorry
+example : binToNat (normalize nine) = 9 := by sorry
 
 /-
 We can define a function that tests if a binary number has one or more
