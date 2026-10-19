@@ -477,44 +477,86 @@ theorem leN_refl (n : Nat) : leN n n = true := by
 
 
 /-
-### Exercise: Interplay of leN and successor: right increment
+### Guided example: induction with generalizing
 
-**Difficulty: 3/4 (substantial).**
+This guided example introduces a variant of the `induction` tactic
+that often arises when dealing with multiple induction candidates.
 
-Prove that the less than or equal relation between two natural numbers is
-preserved by incrementing the right term.
+We'd like to prove that the less than or equal relation between two natural
+numbers is preserved by incrementing the right term:
+-/
 
-Hint: induction on `a` generalizing `b`. In the inductive case,
-case-analysis on `b`.
+theorem leN_succ_right_sorry (a b : Nat) :
+  leN a b = true → leN a (b + 1) = true := by
 
-An explanation about the concept of _generalizing_ a variable is due.
+/-
+The proof is more delicate than the others with standard induction as it
+requires the notion of _generalizing_ a variable.
 
-A side-effect of declaring the arguments of `a` and `b` on the left side of the
-colon `:` is that they're already introduced in the proof context,
-forcing us to work with fixed values for the rest of the proof.
+A side-effect of declaring the arguments of `a` and `b` on the left side
+of the colon `:` is that they're already introduced in the proof context,
+forcing us to work with fixed values for both for the rest of the proof.
 
-You can try proceeding naively by inducting on `a` right away, byt you will
-eventually get stuck with an inductive hypothesis that is too weak to
-prove your goal: the `b` it talks about still refers to the same constant
-value introduced at the beginning of the proof, and doing case analysis on `b`
-specializes the inductive hypothesis even more.
+To see why it matters, let's try proceeding naively by inducting on `a`:
+-/
+  intro h
+  induction a with
+  | zero => rfl
+  | succ a' ih => cases b with
+    | zero => cases h
+    | succ b' =>
+      rw [leN];
+      rw [leN] at h
+      sorry
 
-Instead, we need an inductive hypothesis that works for any natural number `b`.
+/-
+Here we get stuck (look at the proof context with the cursor on `sorry`).
+
+After simplifying the definition of `leN`, we have a proof of
+`h : leN a' b' = true` which almost matches the premise of the
+inductive hypothesis if not for the second argument, which became
+`b' + 1` after doing case analysis on `b`.
+
+The inductive hypothesis is too weak to prove our goal: it should hold for any
+value as the second argument of `leN` and not just the `b` that was fixed at
+the beginning of the proof. What's worse, doing case analysis on `b` specialized
+the inductive hypothesis even more.
+
+What we need to complete the proof is an inductive hypothesis that works
+for any natural number `b`. Let's scratch the previous naive attempt and
+start a new one.
+
 We can ask Lean to produce such a stronger inductive hypothesis that is
-universally quantified on `b` by writing `induction a generalizing b`, before
+universally quantified on `b` by writing `induction a generalizing b` before
 the `with` keyword.
 
-This lets you apply the hypothesis stating `leN a' (b' + 1) = true` to
-the inductive hypotesis, which will give you the goal.
+In the proof below, move the cursor after the arrow of the inductive case.
+Notice the inductive hypothesis now has `∀ (b : Nat)`, meaning it works
+for any natural number as the second operand of `leN`, while the first
+operand `a'` remains fixed.
+
+After doing case analysis on `b` and simplifying the definition of `leN`, we
+can finally apply the proof `h : leN a' b' = true` to the IH, instantiating its
+`b` parameter with `b'`, which will give us the goal.
+
+Therefore, `exact ih b' h` closes the proof.
 -/
 theorem leN_succ_right (a b : Nat) : leN a b = true → leN a (b + 1) = true := by
-  sorry
+  intro h
+  induction a generalizing b with
+  | zero => rfl
+  | succ a' ih => cases b with
+    | zero => cases h
+    | succ b' =>
+      rw [leN];
+      rw [leN] at h;
+      exact ih b' h
 
 
 /-
 ### Exercise: Interplay of leN and successor: left increment
 
-**Difficulty: 3/4 (substantial).**
+**Difficulty: 3/4 (induction with generalize).**
 
 Prove that the less than or equal relation between two natural numbers is also
 preserved by incrementing the left term, or, equivalently, if `a` is strictly
@@ -540,7 +582,8 @@ the induction hypothesis.  Then split `m` with `cases`: the mixed cases
 In the `succ`, `succ` case, use the induction hypothesis.
 
 Note that you don't need to generalize `m` if you intro and induct on `n`
-as suggested because the proposition has `m` universally quantified.
+immediately as recommended, because the proposition has `m` universally
+quantified.
 -/
 
 theorem leN_antisymm : ∀ n m, leN n m → leN m n → eqN n m := by
@@ -761,17 +804,18 @@ inductive BinNat where
 In the rest of the exercise we write binary values using Lean's dot notation
 for constructors, which allows to build larger values of an inductive type by
 appending its unary constructors on the right of an existing value with a dot,
-avoiding the need for parentheses for nested values.
+avoiding the need to wrap nested values in parentheses.
 
-In the case of our binary numbers, it also means we can write them in the more
+In the case of our binary numbers, it also allows to write them in the more
 natural notation where the most significant digits appear on the left.
 -/
 
 def bz := BinNat.bz           -- shorthand to avoid repeating BinNat.bz
 
-def nine := bz.b1.b0.b0.b1
-def nineteen := nine.b1
-def thirtysix := nine.b0.b0
+def six := bz.b1.b1.b0
+def six' := bz.b0.b0.b0.b0.b0.b1.b1.b0
+def thirteen := six.b1
+def twentyfour := six'.b0.b0
 
 
 /-
@@ -943,10 +987,10 @@ behaves correctly.
 
 example : normalize bz.b0 = bz := by sorry
 example : normalize bz.b0.b0.b0.b1 = bz.b1 := by sorry
-example : normalize nine = nine := by sorry
+example : normalize six = six := by sorry
 
 example : binToNat (normalize bz.b0.b0.b0.b1) = 1 := by sorry
-example : binToNat (normalize nine) = 9 := by sorry
+example : binToNat (normalize six) = 9 := by sorry
 
 /-
 We can define a function that tests if a binary number has one or more
@@ -960,7 +1004,8 @@ def hasLeadingZeros : BinNat → Bool
 | .b1 b => hasLeadingZeros b
 
 example : hasLeadingZeros bz.b0 = true := by rfl
-example : hasLeadingZeros nine = false := by rfl
+example : hasLeadingZeros six = false := by rfl
+example : hasLeadingZeros six' = true := by rfl
 example : hasLeadingZeros bz.b0.b0.b1.b0.b0.b1.b0.b0.b1 = true := by rfl
 example : hasLeadingZeros bz.b1.b0.b0.b1.b0.b0.b1.b0.b0.b1 = false := by rfl
 
@@ -1017,7 +1062,7 @@ theorem binDouble_hasLeadingZeros (b : BinNat) :
 /-
 #### Sub-task 4 - Difficulty: 4/4 (boss challenge).
 
-Prove that `normalize` computes the smallest possible resprentation:
+Prove that `normalize` computes the smallest possible representation:
 the binary it returns does not have any leading zero.
 
 Hints:
