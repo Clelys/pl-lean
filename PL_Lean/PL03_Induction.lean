@@ -552,6 +552,13 @@ theorem leN_succ_right (a b : Nat) : leN a b = true → leN a (b + 1) = true := 
       rw [leN] at h;
       exact ih b' h
 
+/-
+By the way, an equivalent theorem is available in Lean's standard library
+under the name `Nat.le_succ_of_le`.
+-/
+
+#print Nat.le_succ_of_le
+
 
 /-
 ### Exercise: Interplay of leN and successor: left increment
@@ -562,12 +569,13 @@ Prove that the less than or equal relation between two natural numbers is also
 preserved by incrementing the left term, or, equivalently, if `a` is strictly
 less than `b` then it is also less than or equal to `b`.
 
+In Lean's standard library this is known as `Nat.le_of_succ_le`.
+
 Hint: induction on `b` generalizing `a`. In the inductive case,
 do case-analysis on `a`.
 -/
 theorem leN_succ_left (a b : Nat) : leN (a + 1) b = true → leN a b = true := by
   sorry
-
 
 /-
 ### Exercise: Antisymmetricity of leN
