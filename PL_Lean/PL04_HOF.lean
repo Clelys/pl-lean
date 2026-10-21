@@ -660,6 +660,7 @@ def anyBelow (p : Nat → Bool) (n : Nat) : Bool :=
 
 example : anyBelow (fun i => eqN i 7) 10  = true := by sorry
 example : anyBelow (fun i => eqN i 11) 10 = false := by sorry
+example : anyBelow (fun i => eqN i 10) 10 = false := by sorry
 
 /-
 __Exercise (difficulty: 1/4)__ Define the function `allBelow`, that returns `true`
@@ -671,6 +672,7 @@ def allBelow (p : Nat → Bool) (n : Nat) : Bool :=
 
 example : allBelow (fun i => eqN (addN i 0) i) 50 = true := by sorry
 example : allBelow (fun i => eqN (doubleN i) i) 10 = false := by sorry
+example : allBelow (fun i => ltN i 10) 10 = true := by sorry
 
 
 end Bounded_experiments
@@ -865,7 +867,7 @@ theorem depositBank_additivity (a n1 n2 : Nat) : (depositBank a n2) ∘ (deposit
 
 
 /- __Exercise (difficulty: 4/4)__ Prove that two withdrawals on the same account have the
-same effect of a single deposit of the sum of the amounts, provided that the account
+same effect of a single withdrawal of the sum of the amounts, provided that the account
 has sufficient initial balance.
 
 Hint: Prove two auxiliary lemmas using the `have` tactic:
