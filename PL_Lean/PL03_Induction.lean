@@ -293,7 +293,8 @@ This does not require induction.  Use `addN_succ_right` and `addN_succ_left`.
 -/
 
 theorem addN_self_succ (n : Nat) : addN (n + 1) (n + 1) = addN n n + 1 + 1 := by
-  sorry
+ rw[addN_succ_left]
+ rw[addN_succ_right]
 
 /-
 ### Exercise: Associativity of addN
@@ -307,7 +308,9 @@ Hint: induction on `k`.  In the successor case, unfold the additions with
 -/
 
 theorem addN_assoc (n m k : Nat) : addN (addN n m) k = addN n (addN m k) := by
-  sorry
+  induction k with
+  | zero => rfl
+  | succ k' ih => simp[addN_succ_right, ih]
 
 /-
 ### Exercise: Zero is left-absorbing for mulN
@@ -321,7 +324,15 @@ holds by computation.
 -/
 
 theorem mulN_zero_left (n : Nat) : mulN 0 n = 0 := by
-  sorry
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+    rw[mulN_succ_right]
+    rw[addN]
+    rw[ih]
+
+
+
 
 
 /-
@@ -338,7 +349,15 @@ hypothesis.  The remaining equality follows by computation.
 #check mulN_succ_right
 
 theorem mulN_one_left (n : Nat) : mulN 1 n = n := by
-  sorry
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+    rw[mulN_succ_right]
+    rw[addN_one_right]
+    rw[ih]
+
+
+
 
 
 /-
@@ -374,8 +393,20 @@ Infoview.  The proof has three phases.
 -/
 
 theorem mulN_succ_left (n m : Nat) : mulN (n + 1) m = addN (mulN n m) m := by
-  sorry
-
+  induction m with
+  | zero =>
+    rw[mulN_zero_right]
+    rw[mulN_zero_right]
+    rfl
+  | succ m' ih =>
+    rw[mulN_succ_right]
+    rw[mulN_succ_right]
+    rw[ih]
+    rw[addN_succ_right]
+    rw[addN_succ_right]
+    rw[addN_assoc]
+    rw[addN_assoc]
+    rw[addN_comm n]
 
 /-
 ### Exercise: Commutativity of mulN
@@ -388,7 +419,15 @@ Hint: in the inductive case, exploit `mulN_succ_right` and `mulN_succ_left`.
 -/
 
 theorem mulN_comm (n m : Nat) : mulN n m = mulN m n := by
-  sorry
+  induction m with
+  | zero =>
+      rw[mulN_zero_left]
+      rfl
+  | succ m' ih =>
+    rw[mulN_succ_right]
+    rw[mulN_succ_left]
+    rw[ih]
+
 
 
 /-
@@ -411,10 +450,22 @@ and `mulN` can then unfold.  So the natural choice is induction on `c`.
 -/
 
 theorem mulN_addN_distrib_left (a b c : Nat) : mulN a (addN b c) = addN (mulN a b) (mulN a c) := by
-  sorry
+  induction c with
+  | zero => rfl
+  | succ c' ih =>
+    rw[mulN_succ_right]
+    rw[addN_succ_right]
+    rw[mulN_succ_right]
+    rw[addN_comm]
+    rw[addN_comm]
+    rw[ih]
+    rw[addN_assoc]
+
 
 
 /-
+
+
 #### Optional challenge: choose a less convenient induction variable
 
 **Difficulty: 4/4.**
@@ -425,13 +476,30 @@ illustrates why choosing the variable that controls the stuck recursive
 definition usually leads to a clearer proof.
 -/
 
-theorem zero_mulN (n : Nat) : mulN 0 n = 0 := by
-  induction n with
+theorem mulN_addN_distrib_left_by_first_arg (a b c : Nat) :
+    mulN a (addN b c) = addN (mulN a b) (mulN a c) := by
+  sorry
+
+
+/-
+### Exercise: Associativity of mulN
+
+**Difficulty: 3/4 (substantial).**
+
+Prove that multiplication is associative (theorem `mulN_assoc`).
+
+Hint: in the inductive case, exploit `mulN_addN_distrib_left`.
+-/
+
+theorem mulN_assoc (n m k : Nat) : mulN (mulN n m) k = mulN n (mulN m k) := by
+  induction k with
   | zero => rfl
-  | succ n' ih =>
-      rw [mulN_succ]
-      rw [ih]
-      rw [addN_zero]
+  | succ k' ih =>
+      rw[mulN]
+      rw[mulN]
+      rw[mulN_addN_distrib_left]
+      rw[ih]
+
 
 
 /-
@@ -449,6 +517,26 @@ theorem eqN_refl (a : Nat) : eqN a a = true := by
   | succ a' ih => exact ih
 
 /-
+
+
+### Exercise: Reflexivity of leN
+
+**Difficulty: 1/4 (warm-up).**
+
+Prove that every natural number is less than or equal to itself.  The proof has
+the same inductive shape as `eqN_refl`.
+
+def leN : Nat → Nat → Bool
+  | 0,     _     => true
+  | _ + 1, 0     => false
+  | n + 1, m + 1 => leN n m
+
+-/
+
+theorem leN_refl (n : Nat) : leN n n = true := by
+  sorry
+
+/-
 ### Exercise: Antisymmetricity of leN
 
 **Difficulty: 4/4 (challenge).**
@@ -462,7 +550,23 @@ In the `succ`, `succ` case, use the induction hypothesis.
 -/
 
 theorem leN_antisymm : ∀ n m, leN n m → leN m n → eqN n m := by
-  sorry
+  intro n
+  induction n with
+  | zero =>
+      intro m hnm hmn
+      cases m with
+      | zero => rfl
+      | succ m' => simp [leN] at hmn
+  | succ n' ih =>
+      intro m hnm hmn
+      cases m with
+      | zero => simp [leN] at hnm
+      | succ m' =>
+          apply ih m'
+          · simpa [leN] using hnm
+          · simpa [leN] using hmn
+
+
 
 
 /-
@@ -481,7 +585,11 @@ def subN : Nat → Nat → Nat
 -/
 
 theorem subN_self (n : Nat) : subN n n = 0 := by
-  sorry
+  induction n with
+  | zero => rfl
+  | succ n' ih =>
+    rw[subN]
+    rw[ih]
 
 
 /-
@@ -552,7 +660,18 @@ After the case split, both sides compute to the same Boolean expression, so
 
 theorem evalBExp_dual (t : BExp) :
     evalBExp (dualBExp t) = !(evalBExp t) := by
-  sorry
+  induction t with
+  | btrue => rfl
+  | bfalse => rfl
+  | bifte t0 t1 t2 ih0 ih1 ih2 =>
+    rw[dualBExp]
+    rw[evalBExp]
+    rw[evalBExp]
+    rw[ih0, ih1, ih2]
+    cases h : evalBExp t0 <;> simp
+
+
+
 
 
 
@@ -616,10 +735,8 @@ __Exercise (difficulty 2/4):__ Define a function `bexpconn_to_bexp` that transla
 `BExpConn` terms into `BExp` terms, following the intuition above.
 -/
 
-theorem addN_assoc (n m k : Nat) : addN (addN n m) k = addN n (addN m k) := by
-  induction k with
-  | zero => rfl
-  | succ k' ih => simp[addN_succ_right, ih]
+def bexpconn_to_bexp : BExpConn → BExp := sorry
+
 
 
 /-
@@ -633,10 +750,8 @@ subexpression.  The syntax `cases h : e` performs the split and records an
 equation for `e`, allowing the surrounding conditional to compute.
 
 -/
-
-theorem addN_id' (n m : Nat) : addN n n = addN m m → n = m := by
- sorry
-
+theorem bexpconn_equiv_bexp (t : BExpConn) : evalBExpConn t = evalBExp (bexpconn_to_bexp t) := by
+  sorry
 
 end Exercises
 
