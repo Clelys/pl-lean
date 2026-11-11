@@ -1,3 +1,4 @@
+import PL_Lean.PL02_Nat
 set_option autoImplicit false
 
 /-
@@ -61,7 +62,6 @@ def myPair : Nat × Bool := (3, true)
 /- This is equivalent to using the explicit **introduction** operator `Prod.mk`: -/
 
 def myPair₂ : Nat × Bool := Prod.mk 3 true
-
 example : myPair = myPair₂ := by rfl
 
 /-
@@ -73,11 +73,11 @@ Products can also be **nested**, and functions may return pairs.
 /- __Exercise (difficulty: 1/4)__ Construct values of the given types.
 Notice where the parentheses occur. -/
 
-example : Nat × Nat           := sorry
-example : (Nat × Bool) × Nat  := sorry
-example : Nat × (Bool × Nat)  := sorry
-example : Nat → (Nat × Nat)   := sorry
-example : Nat → (Nat × Bool)  := sorry
+example : Nat × Nat           := Prod.mk 3 3
+example : (Nat × Bool) × Nat  := Prod.mk (Prod.mk 2 true) 2
+example : Nat × (Bool × Nat)  := Prod.mk 2 (Prod.mk false 4)
+example : Nat → (Nat × Nat)   := fun _ => Prod.mk 5 6
+example : Nat → (Nat × Bool)  := fun _ => Prod.mk 4 false
 
 /-
 Parentheses matter. In general,
@@ -122,13 +122,15 @@ example : swapNatBool (0, false) = (false, 0) := by rfl
 /- __Exercise (difficulty: 1/4)__ Define the following functions using projections. -/
 
 def sumComponents (p : Nat × Nat) : Nat :=
-  sorry
+  Add.add p.1 p.2
+
+example : sumComponents (7, 3) = 10 := by rfl
 
 def keepFirstAndDoubleSecond (p : Nat × Nat) : Nat × Nat :=
-  sorry
+  Prod.mk p.1 (Nat.mul p.2 2)
 
-example : sumComponents (3, 4) = 7                  := by sorry
-example : keepFirstAndDoubleSecond (3, 4) = (3, 8)  := by sorry
+example : sumComponents (3, 4) = 7                  := by rfl
+example : keepFirstAndDoubleSecond (3, 4) = (3, 8)  := by rfl
 
 end Projections
 
@@ -157,21 +159,22 @@ example (p : Nat × Bool): swapNatBool₂ p  = swapNatBool p := by rfl
 /- __Exercise (difficulty: 1/4)__ Define the following functions using pattern matching. -/
 
 def addPair : Nat × Nat → Nat
-  := sorry
+  | (n, b) => Add.add n b
 
 def mulPair : Nat × Nat → Nat
-  := sorry
+  | (n, b) => Mul.mul n b
 
-example : addPair (3, 4) = 7  := by sorry
-example : mulPair (3, 4) = 12 := by sorry
+example : addPair (3, 4) = 7  := by rfl
+example : mulPair (3, 4) = 12 := by rfl
 
 /- __Exercise (difficulty: 1/4)__ The Boolean component chooses which number to return. -/
 
 def chooseFromPair : (Nat × Nat) × Bool → Nat
-  := sorry
+  | ((n, _),true) => n
+  | ((_, b), false) => b
 
-example : chooseFromPair ((10, 20), true)  = 10 := by sorry
-example : chooseFromPair ((10, 20), false) = 20 := by sorry
+example : chooseFromPair ((10, 20), true)  = 10 := by rfl
+example : chooseFromPair ((10, 20), false) = 20 := by rfl
 
 end Pattern_matching
 
@@ -193,6 +196,7 @@ example : (7, 8, 9) = (7, (8, 9)) := by rfl
 example : (7, 8, 9).1 = 7 := by rfl
 example : (7, 8, 9).2 = (8, 9) := by rfl
 example : (7, 8, 9).2.1 = 8 := by rfl
+example : (7, 8, 9).2.2 = 9 := by rfl
 
 
 /- __Exercise (difficulty: 1/4)__ Define a function `rev4` that reverses 4-tuples.
@@ -200,12 +204,12 @@ Then, prove that applying `rev4` twice is the identity function.
 -/
 
 def rev4: Nat × Nat × Nat × Nat → Nat × Nat × Nat × Nat
-  := sorry
+  | (a, b, c, d) => (d, c, b, a)
 
-example : rev4 (1,2,3,4) = (4,3,2,1) := by sorry
+example : rev4 (1,2,3,4) = (4,3,2,1) := by rfl
 
 theorem rev4_rev4_equiv_id4 : ∀ t : Nat × Nat × Nat × Nat, rev4 (rev4 t) = t := by
-  sorry
+  simp[rev4]
 
 /-
 We can use pattern matching also on nested pairs. As usual, the wildcard `_` can match everything.
@@ -224,12 +228,13 @@ example : addTwoPairs ((1, 2), (3, 4)) = 10 := by rfl
 -/
 
 def minOrMax : (Nat × Nat) × Bool → Nat
-  := sorry
+  | ((n, m),false) => min n m
+  | ((n,m), true) => max n m
 
-example : minOrMax ((1, 2), false) = 1 := by sorry
-example : minOrMax ((3, 2), false) = 2 := by sorry
-example : minOrMax ((1, 3), true)  = 3 := by sorry
-example : minOrMax ((4, 2), true)  = 4 := by sorry
+example : minOrMax ((1, 2), false) = 1 := by rfl
+example : minOrMax ((3, 2), false) = 2 := by rfl
+example : minOrMax ((1, 3), true)  = 3 := by rfl
+example : minOrMax ((4, 2), true)  = 4 := by rfl
 
 end Tuples
 
@@ -247,18 +252,18 @@ applies two computations to the same input and returns both results.
 def bothResultsN (f g : Nat → Nat) (n : Nat) : Nat × Nat :=
   (f n, g n)
 
-example : bothResultsN Nat.succ (Nat.pred) 2 = (1,3) := sorry
-example : bothResultsN Nat.succ (fun n => n+n) 5 = sorry := sorry
+example : bothResultsN Nat.succ (Nat.pred) 2 = (3, 1) := by rfl
+example : bothResultsN Nat.succ (fun n => n+n) 5 = (6, 10) := by rfl
 
 /- __Exercise (difficulty: 1/4)__ Define a function `minMax` that takes as input two numbers,
 and returns a pair where the left element is the smaller input and right element if the the larger input. -/
 
 def minMax (a b : Nat) : Nat × Nat :=
-  sorry
+  Prod.mk (min a b) (max a b)
 
-example : minMax 3 8 = (3, 8) := by sorry
-example : minMax 8 3 = (3, 8) := by sorry
-example : minMax 4 4 = (4, 4) := by sorry
+example : minMax 3 8 = (3, 8) := by rfl
+example : minMax 8 3 = (3, 8) := by rfl
+example : minMax 4 4 = (4, 4) := by rfl
 
 end Functions_returning_pairs
 
@@ -284,13 +289,13 @@ def emptyTuple : Unit := ()
 /- __Exercise (difficulty: 1/4)__ Prove that type `Unit` is inhabited. -/
 
 theorem unit_inhabited : ∃ x : Unit, x = () := by
-  sorry
+  simp[Unit]
 
 /- __Exercise (difficulty: 1/4)__ Prove that two elements of type `Unit` must be identical.
 Hint: by case analysis. -/
 
 theorem unit_unique (x y : Unit) : x = y := by
-  sorry
+  rfl
 
 /-
 __Exercise (difficulty: 1/4)__ Show that pairing a number with `()` adds no information.
@@ -301,16 +306,16 @@ Split the proof in 3 parts:
 -/
 
 def removeUnitRight (p : Nat × Unit) : Nat :=
-  sorry
+  p.1
 
 def addUnitRight (n : Nat) : Nat × Unit :=
-  sorry
+  (n, ())
 
 theorem remove_comp_add_id (n : Nat): removeUnitRight (addUnitRight n) = n := by
-  sorry
+  rfl
 
 theorem add_comp_remove_id (p : Nat × Unit): addUnitRight (removeUnitRight p) = p := by
-  sorry
+  rfl
 
 end Unit_type
 
@@ -447,10 +452,10 @@ def swapBoolNat : Bool × Nat → Nat × Bool
 /- __Exercise (difficulty: 1/4)__ Prove both round trips. -/
 
 theorem swapBoolNat_comp_swapNatBool_id (p : Nat × Bool) : swapBoolNat (swapNatBool p) = p := by
-  sorry
+  rfl
 
 theorem swapNatBool_comp_swapBoolNat_id (p : Bool × Nat) : swapNatBool (swapBoolNat p) = p := by
-  sorry
+  rfl
 
 end Type_isomorphisms
 
@@ -510,10 +515,10 @@ example : uncurryN (fun (n m : Nat) => n + m)          (3, 4) = 7 := by rfl
 /- __Exercise (difficulty: 1/4)__ Prove the type isomorphism. -/
 
 theorem curryN_uncurryN (f : Nat → Nat → Nat) : curryN (uncurryN f) = f := by
-  sorry
+  rfl
 
 theorem uncurryN_curryN (f : Nat × Nat → Nat) : uncurryN (curryN f) = f := by
-  sorry
+  rfl
 
 end Currying
 
@@ -552,6 +557,8 @@ Fields are accessed by name rather than by position:
 
 example : pointA.x = 3 := by rfl
 example : pointA.y = 5 := by rfl
+example : origin.x = 0 := by rfl
+example : origin.y = 0 := by rfl
 
 /-
 Pattern matching is also available. This form makes it explicit that a
@@ -560,6 +567,9 @@ structure has one constructor carrying all its fields.
 
 def getX : Point → Nat
   | { x, y } => x
+
+def getY : Point → Nat
+  | {x := _, y} => y     --esempio senza warning
 
 /-
 Lean reports a warning for `y` because the pattern binds both fields of the
@@ -688,19 +698,21 @@ example : natOrBoolToNat (.inr false) = 0 := by rfl
 /- __Exercise (difficulty: 1/4)__ `isNatAlternative` tests which side was chosen. -/
 
 def isNatAlternative : Nat ⊕ Bool → Bool
-  := sorry
+  | .inl _ => true
+  | .inr b => b
 
-example : isNatAlternative (.inl 3) = true      := by sorry
-example : isNatAlternative (.inr false) = false := by sorry
+example : isNatAlternative (.inl 3) = true      := by rfl
+example : isNatAlternative (.inr false) = false := by rfl
 
 
 /- __Exercise (difficulty: 1/4)__ Return the successor of the payload or its negation. -/
 
 def succOrNot : Nat ⊕ Bool → Nat ⊕ Bool
-  := sorry
+| .inl n => .inl (Nat.succ n)
+| .inr b => .inr (not b)
 
-example : succOrNot (.inl 5) = .inl 6         := by sorry
-example : succOrNot (.inr true) = .inr false  := by sorry
+example : succOrNot (.inl 5) = .inl 6         := by rfl
+example : succOrNot (.inr true) = .inr false  := by rfl
 
 end Pattern_matching
 
@@ -818,11 +830,15 @@ Use the `cases` tactic to create two goals.
 
 theorem swapBoolNatSum_comp_swapNatBoolSum_id (s : Nat ⊕ Bool) :
     swapBoolNatSum (swapNatBoolSum s) = s := by
-  sorry
+  cases s with
+  | inl n => rfl
+  | inr b => rfl
 
 theorem swapNatBoolSum_comp_swapBoolNatSum_id (s : Bool ⊕ Nat) :
     swapNatBoolSum (swapBoolNatSum s) = s := by
-  sorry
+  cases s with
+  | inl b => rfl
+  | inr n => rfl
 
 end Type_isomorphisms
 
@@ -864,10 +880,10 @@ Hint: use the modulus operator: `%`.
 -/
 
 def nextEven (n : Nat): Nat ⊕ Unit :=
-  sorry
+  if isEven n then .inl (n + 2)  else .inr ()
 
-example : nextEven 4 = .inl 6  := by sorry
-example : nextEven 5 = .inr () := by sorry
+example : nextEven 4 = .inl 6  := by rfl
+example : nextEven 5 = .inr () := by rfl
 
 /-
 We define a function that takes two partial functions and sums them.
@@ -882,9 +898,9 @@ def partial_sum (f g: Nat → Nat ⊕ Unit) (n : Nat) : Nat ⊕ Unit :=
     | .inl rg => .inl (rf + rg)
 
 
-example : (partial_sum partial_pred nextEven) 0 = .inr () := by sorry
-example : (partial_sum partial_pred nextEven) 1 = .inr () := by sorry
-example : (partial_sum partial_pred nextEven) 2 = .inl 5  := by sorry
+example : (partial_sum partial_pred nextEven) 0 = .inr () := by rfl
+example : (partial_sum partial_pred nextEven) 1 = .inr () := by rfl
+example : (partial_sum partial_pred nextEven) 2 = .inl 5  := by rfl
 
 /-
 Lean features a special type constructor `Option` to deal with partial functions.
@@ -920,19 +936,23 @@ example : getOrElseN 100 (partial_pred₂ 0) = 100 := by rfl
 It returns `none` instead of truncating to zero when `b > a`. -/
 
 def partial_sub (a b : Nat) : Option Nat :=
-  sorry
+  if b > a then none else subN a b
 
-example : partial_sub 10 3 = some 7 := by sorry
-example : partial_sub 3 10 = none   := by sorry
+example : partial_sub 10 3 = some 7 := by rfl
+example : partial_sub 3 10 = none   := by rfl
 
 /- __Exercise (difficulty: 1/4)__ Add two optional numbers only when both are present. -/
 
 def partial_sum₂ (f g: Nat → Option Nat) (n : Nat) : Option Nat :=
-  sorry
+    match f n with
+  |  none =>  none
+  |  some rf => match g n with
+    |  none => none
+    | some rg => some (rf + rg)
 
-example : (partial_sum₂ partial_pred₂ (partial_sub 10)) 0  = none   := by sorry
-example : (partial_sum₂ partial_pred₂ (partial_sub 10)) 11 = none   := by sorry
-example : (partial_sum₂ partial_pred₂ (partial_sub 10)) 2  = some 9 := by sorry
+example : (partial_sum₂ partial_pred₂ (partial_sub 10)) 0  = none   := by rfl
+example : (partial_sum₂ partial_pred₂ (partial_sub 10)) 11 = none   := by rfl
+example : (partial_sum₂ partial_pred₂ (partial_sub 10)) 2  = some 9 := by rfl
 
 
 /-
@@ -978,23 +998,24 @@ a function `g` that behaves as `f` on the input values that satisfy `p`, and is 
 -/
 
 def restrict (f : Nat → Nat) (p : Nat → Bool) : (Nat → Option Nat) :=
-  sorry
+  fun n =>
+     if p n then some (f n) else none
 
 def f1_res := restrict Nat.succ (fun x => x>0)
-example : f1_res 1 = some 2 := by sorry
-example : f1_res 0 = none   := by sorry
+example : f1_res 1 = some 2 := by rfl
+example : f1_res 0 = none   := by rfl
 
 /- Prove that `restrict f p n` is undefined whenever `p n` is false. -/
 
 theorem restrict_none (f : Nat → Nat) (p : Nat → Bool) :
   ∀ n : Nat, p n = false → restrict f p n = none := by
-  sorry
+  simp[restrict]
 
 /- Prove that `restrict f p n` is defined whenever `p n` is true. -/
 
 theorem restrict_some (f : Nat → Nat) (p : Nat → Bool) :
   ∀ n : Nat, p n = true → exists v : Nat, restrict f p n = some v := by
-  sorry
+  simp[restrict]
 
 end Domain_restriction
 
@@ -1010,17 +1031,29 @@ section Max_option
 /- __Exercise (difficulty: 1/4)__ Define partial maximum. -/
 
 def max_option (o1 o2: Option Nat) : Option Nat :=
-  sorry
+  match o1, o2 with
+  | none, none => none
+  | none, some ro2 => some ro2
+  | some ro1, none => some ro1
+  | some ro1, some ro2 => some (max ro1 ro2)
 
-example : max_option (some 3) (some 5) = some 5 := by sorry
-example : max_option (some 3) none = some 3     := by sorry
-example : max_option none (some 5) = some 5     := by sorry
+
+example : max_option (some 3) (some 5) = some 5 := by rfl
+example : max_option (some 3) none = some 3     := by rfl
+example : max_option none (some 5) = some 5     := by rfl
 
 
 /- __Exercise (difficulty: 3/4)__ Prove that partial maximum is undefined whenever both inputs are none. -/
 
 theorem max_option_none (o1 o2: Option Nat) : max_option o1 o2 = none ↔ o1 = none ∧ o2 = none := by
-  sorry
+  cases o1 with
+  | none => cases o2 with
+    | none => simp[max_option]
+    | some ro2 => simp[max_option]
+  | some ro1 => cases o2 with
+    | none => simp[max_option]
+    | some ro2 => simp[max_option]
+
 
 /-
 __Exercise (difficulty: 3/4)__ Prove the following property of the partial maximum.
@@ -1064,11 +1097,28 @@ Evaluation is a partial function. It is undefined in the following cases:
 -/
 
 def eval (e : Aexp) : Option Nat :=
-  sorry
+  match e with
+  | Aexp.val n => some n
+  | Aexp.add (e1, e2) => do
+    let n1 ← eval e1
+    let n2 ← eval e2
+    pure (n1 + n2)
+  | Aexp.sub (e1, e2) => do
+    let n1 ← eval e1
+    let n2 ← eval e2
+    if n2 > n1 then none else pure (n1 - n2)
+  | Aexp.mul (e1, e2) => do
+    let n1 ← eval e1
+    let n2 ← eval e2
+    pure (n1 * n2)
+  | Aexp.div (e1, e2) => do
+    let n1 ← eval e1
+    let n2 ← eval e2
+    if n2 = 0 then none else pure (n1 / n2)
 
-example : eval (Aexp.add (Aexp.val 1, Aexp.val 2)) = some 3                      := by sorry
-example : eval (Aexp.add (Aexp.val 1, Aexp.sub (Aexp.val 2, Aexp.val 3))) = none := by sorry
-example : eval (Aexp.mul (Aexp.val 1, Aexp.div (Aexp.val 2, Aexp.val 0))) = none := by sorry
+example : eval (Aexp.add (Aexp.val 1, Aexp.val 2)) = some 3                      := by rfl
+example : eval (Aexp.add (Aexp.val 1, Aexp.sub (Aexp.val 2, Aexp.val 3))) = none := by rfl
+example : eval (Aexp.mul (Aexp.val 1, Aexp.div (Aexp.val 2, Aexp.val 0))) = none := by rfl
 
 
 /-
@@ -1087,27 +1137,39 @@ theorem eval_add_success
     (h1 : eval e1 = some n1)
     (h2 : eval e2 = some n2) :
     eval (.add (e1, e2)) = some (n1 + n2) := by
-  sorry
+  simp[eval]
+  rw[h1]
+  rw[h2]
+  rfl
+
+
+
 
 theorem eval_add_error_left
     (e1 e2 : Aexp)
     (h : eval e1 = none) :
     eval (.add (e1, e2)) = none := by
-  sorry
+  simp[eval]
+  simp[h]
+
 
 theorem eval_add_error_right
     (e1 e2 : Aexp)
     (h : eval e2 = none) :
     eval (.add (e1, e2)) = none := by
-  sorry
+  simp[eval]
+  simp[h]
+
 
 theorem eval_add_zero_right (e : Aexp) :
     eval (.add (e, .val 0)) = eval e := by
-  sorry
+  simp[eval]
 
 theorem eval_add_commutative (e1 e2 : Aexp) :
     eval (.add (e1, e2)) = eval (.add (e2, e1)) := by
   sorry
+
+
 
 theorem eval_add_characterization
     (e1 e2 : Aexp) (n : Nat) :
